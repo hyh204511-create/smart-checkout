@@ -1,0 +1,50 @@
+<!-- 销售报表页 -->
+<scroll-view scroll-y="true" class="page">
+    <!-- 日期筛选 -->
+    <view class="filter-bar flex-between">
+        <picker mode="date" value="{{dateFrom}}" bindchange="onDateFrom">
+            <text class="date-btn">{{dateFrom || '开始日期'}}</text>
+        </picker>
+        <text>至</text>
+        <picker mode="date" value="{{dateTo}}" bindchange="onDateTo">
+            <text class="date-btn">{{dateTo || '结束日期'}}</text>
+        </picker>
+        <button class="btn-small" bindtap="loadData">查询</button>
+    </view>
+
+    <!-- 汇总数据 -->
+    <view class="card flex-row" style="gap:32rpx">
+        <view class="flex-col" style="flex:1;align-items:center">
+            <text class="sum-big">¥{{totalAmount}}</text>
+            <text class="text-gray">总销售额</text>
+        </view>
+        <view class="flex-col" style="flex:1;align-items:center">
+            <text class="sum-big">{{totalCount}}</text>
+            <text class="text-gray">总订单数</text>
+        </view>
+    </view>
+
+    <!-- 按设备汇总 -->
+    <view class="card" wx:if="{{byDevice.length > 0}}">
+        <view class="card-title">各设备销售额</view>
+        <view wx:for="{{byDevice}}" wx:key="device_id" class="device-sales-item flex-between">
+            <text>{{item.device_id}}</text>
+            <view>
+                <text class="text-bold">¥{{item.amount.toFixed(2)}}</text>
+                <text class="text-gray" style="margin-left:16rpx">{{item.count}}单</text>
+            </view>
+        </view>
+    </view>
+
+    <!-- 按日期汇总 -->
+    <view class="card" wx:if="{{byDate.length > 0}}">
+        <view class="card-title">每日销售额</view>
+        <view wx:for="{{byDate}}" wx:key="date" class="device-sales-item flex-between">
+            <text>{{item.date}}</text>
+            <view>
+                <text class="text-bold">¥{{item.amount.toFixed(2)}}</text>
+                <text class="text-gray" style="margin-left:16rpx">{{item.count}}单</text>
+            </view>
+        </view>
+    </view>
+</scroll-view>

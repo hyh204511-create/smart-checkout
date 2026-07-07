@@ -1,0 +1,29 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>重置密码</title>
+    {% load static %}
+
+<link href="{% static 'css/font-awesome.min.css' %}" rel="stylesheet">
+<script src="{% static 'js/jquery.min.js' %}"></script>
+<script src="{% static 'js/sweetalert2.all.min.js' %}"></script>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f1f5f9; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 40px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; }
+        h2 { color: #334155; }
+        p { color: #64748b; margin-bottom: 20px; }
+        a { color: #2563eb; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <i class="fa fa-info-circle" style="font-size: 48px; color: #3b82f6; margin-bottom: 16px;"></i>
+        <h2>需要重置密码？</h2>
+        <p>请联系系统管理员或技术支持人员重置您的账户密码。</p>
+        <a href="/login/">返回登录页</a>
+    </div>
+</body>
+</html>

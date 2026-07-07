@@ -1,0 +1,49 @@
+{
+    "pages": [
+        "pages/login/login",
+        "pages/dashboard/dashboard",
+        "pages/device-detail/device-detail",
+        "pages/sales-report/sales-report",
+        "pages/product-manage/product-manage",
+        "pages/settings/settings"
+    ],
+    "window": {
+        "navigationBarBackgroundColor": "#07C160",
+        "navigationBarTitleText": "生鲜收银管理",
+        "navigationBarTextStyle": "white",
+        "backgroundColor": "#F5F5F5"
+    },
+    "tabBar": {
+        "color": "#999999",
+        "selectedColor": "#07C160",
+        "list": [
+            {
+                "pagePath": "pages/dashboard/dashboard",
+                "text": "仪表板",
+                "iconPath": "images/icon-home.png",
+                "selectedIconPath": "images/icon-home-active.png"
+            },
+            {
+                "pagePath": "pages/sales-report/sales-report",
+                "text": "报表",
+                "iconPath": "images/icon-chart.png",
+                "selectedIconPath": "images/icon-chart-active.png"
+            },
+            {
+                "pagePath": "pages/product-manage/product-manage",
+                "text": "商品",
+                "iconPath": "images/icon-goods.png",
+                "selectedIconPath": "images/icon-goods-active.png"
+            },
+            {
+                "pagePath": "pages/settings/settings",
+                "text": "设置",
+                "iconPath": "images/icon-set.png",
+                "selectedIconPath": "images/icon-set-active.png"
+            }
+        ]
+    },
+    "networkTimeout": {
+        "request": 15000
+    }
+}

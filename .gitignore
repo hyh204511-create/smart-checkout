@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+*.pyo
+*.db
+*.sqlite3
+*.rknn
+*.onnx
+*.ttf
+.vscode/
+.idea/
+*.code-workspace
+Thumbs.db
+.DS_Store
+*.log
+staticfiles/
+media/

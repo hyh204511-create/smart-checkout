@@ -1,0 +1,418 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理后台 - 智能生鲜系统</title>
+    {% load static %}
+<script src="{% static 'js/echarts.min.js' %}"></script>
+<link href="{% static 'css/font-awesome.min.css' %}" rel="stylesheet">
+<script src="{% static 'js/jquery.min.js' %}"></script>
+<script src="{% static 'js/sweetalert2.all.min.js' %}"></script>    <style>
+        /* 原生 CSS 样式，保持不变 */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif; background-color: #f1f5f9; display: flex; height: 100vh; overflow: hidden; }
+        a { text-decoration: none; color: inherit; }
+
+        .sidebar { width: 260px; background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); color: white; display: flex; flex-direction: column; box-shadow: 4px 0 10px rgba(0,0,0,0.1); z-index: 10; }
+        .sidebar-header { padding: 30px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .logo-box { width: 60px; height: 60px; background: #22c55e; border-radius: 12px; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; font-size: 30px; box-shadow: 0 4px 12px rgba(34,197,94,0.3); }
+        .app-name { font-size: 18px; font-weight: bold; letter-spacing: 1px; }
+        .version { font-size: 12px; color: #94a3b8; margin-top: 5px; }
+
+        .nav-menu { flex: 1; padding: 20px; }
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 15px 20px; color: #cbd5e1; border-radius: 10px; margin-bottom: 8px; transition: 0.3s; }
+        .nav-item:hover { background: rgba(255,255,255,0.1); color: white; transform: translateX(5px); }
+        .nav-item.active { background: rgba(255,255,255,0.15); color: white; border-left: 4px solid #22c55e; }
+        .nav-item i { width: 20px; text-align: center; font-size: 18px; }
+
+        .logout-btn { display: block; margin: 20px; padding: 12px; text-align: center; border: 1px solid rgba(34,197,94,0.3); color: #4ade80; border-radius: 8px; background: rgba(34,197,94,0.1); transition: 0.3s; }
+        .logout-btn:hover { background: #22c55e; color: white; }
+
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+
+        .top-header { height: 70px; background: white; padding: 0 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .page-title { font-size: 20px; font-weight: bold; color: #334155; display: flex; align-items: center; gap: 10px; }
+        .title-bar { width: 6px; height: 24px; background: #22c55e; border-radius: 3px; }
+        .user-info { display: flex; align-items: center; gap: 15px; }
+        .time-badge { background: #f1f5f9; padding: 5px 12px; border-radius: 6px; color: #64748b; font-family: monospace; font-size: 14px; }
+        .avatar { width: 36px; height: 36px; background: #dcfce7; color: #166534; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid #bbf7d0; }
+
+        .content-scroll { flex: 1; overflow-y: auto; padding: 30px; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); display: flex; align-items: center; transition: 0.3s; }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px rgba(0,0,0,0.1); }
+        .stat-icon { width: 60px; height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-right: 20px; }
+        .stat-icon.red { background: #fef2f2; color: #ef4444; }
+        .stat-icon.blue { background: #eff6ff; color: #3b82f6; }
+        .stat-icon.green { background: #ecfdf5; color: #10b981; }
+        .stat-icon.purple { background: #faf5ff; color: #a855f7; }
+        .stat-label { font-size: 12px; color: #94a3b8; font-weight: bold; text-transform: uppercase; margin-bottom: 5px; }
+        .stat-value { font-size: 28px; font-weight: 800; color: #1e293b; }
+
+        .charts-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 30px; margin-bottom: 30px; height: 420px; }
+        .chart-card { background: white; border-radius: 12px; padding: 25px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); display: flex; flex-direction: column; }
+        .card-header { font-size: 16px; font-weight: bold; color: #334155; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+        .chart-container { flex: 1; width: 100%; min-height: 0; }
+
+        .bottom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        .panel { background: white; border-radius: 12px; padding: 30px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); position: relative; overflow: hidden; }
+        .panel-stripe { position: absolute; top: 0; left: 0; width: 6px; height: 100%; }
+        .panel-stripe.green { background: #22c55e; }
+        .panel-stripe.orange { background: #f97316; }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 12px; font-weight: bold; color: #94a3b8; margin-bottom: 8px; text-transform: uppercase; }
+        .form-input { width: 100%; padding: 12px 15px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; font-size: 14px; outline: none; transition: 0.2s; }
+        .form-input:focus { border-color: #22c55e; background: white; box-shadow: 0 0 0 3px rgba(34,197,94,0.1); }
+        .submit-btn { width: 100%; padding: 14px; background: #16a34a; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .submit-btn:hover { background: #15803d; }
+        .submit-btn:active { transform: scale(0.98); }
+
+        .sales-list { max-height: 220px; overflow-y: auto; padding-right: 5px; }
+        .sales-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #f8fafc; border-radius: 8px; margin-bottom: 10px; }
+        .sales-item:hover { background: #f1f5f9; }
+        .item-info { display: flex; align-items: center; gap: 15px; }
+        .item-icon { width: 40px; height: 40px; background: white; border: 1px solid #e2e8f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: #64748b; }
+        .money-text { font-family: monospace; font-size: 18px; font-weight: bold; color: #16a34a; }
+
+        @media (max-width: 1200px) {
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .charts-grid { grid-template-columns: 1fr; height: auto; }
+            .chart-card { height: 400px; }
+            .bottom-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo-box"><i class="fa fa-leaf"></i></div>
+            <div class="app-name">鲜果管理后台</div>
+            <div class="version">V2.0 Pro System</div>
+        </div>
+        <nav class="nav-menu">
+            <a href="/dashboard/" class="nav-item active">
+                <i class="fa fa-tachometer"></i> 数据看板
+            </a>
+            <a href="/products/manage/" class="nav-item">
+                <i class="fa fa-cubes"></i> 库存管理
+            </a>
+<div style="margin-bottom: 20px; text-align: right;">
+    <button onclick="generateAIReport()" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4); transition: all 0.3s;">
+        <i class="fa fa-magic"></i>Qwen本地AI智能助理
+    </button>
+</div>
+        </nav>
+        <a href="/" class="logout-btn">
+            <i class="fa fa-sign-out"></i> 返回收银台
+        </a>
+    </aside>
+    <main class="main-content">
+        <header class="top-header">
+            <div class="page-title">
+                <div class="title-bar"></div>
+                经营数据驾驶舱
+            </div>
+            <div class="user-info">
+                <div class="time-badge" id="current-time"></div>
+                <div class="avatar"><i class="fa fa-user"></i></div>
+            </div>
+        </header>
+
+        <div class="content-scroll">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon red"><i class="fa fa-yen"></i></div>
+                    <div>
+                        <div class="stat-label">今日营收</div>
+                        <div class="stat-value" id="today-sales">--</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon blue"><i class="fa fa-shopping-bag"></i></div>
+                    <div>
+                        <div class="stat-label">今日订单</div>
+                        <div class="stat-value" id="today-orders">--</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon green"><i class="fa fa-server"></i></div>
+                    <div>
+                        <div class="stat-label">系统状态</div>
+                        <div class="stat-value" style="color:#16a34a; font-size:20px;">运行正常</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon purple"><i class="fa fa-database"></i></div>
+                    <div>
+                        <div class="stat-label">数据库</div>
+                        <div class="stat-value" style="font-size:20px;">已连接</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <div class="card-header"><i class="fa fa-line-chart" style="color:#10b981"></i> 近7天销售趋势</div>
+                    <div id="chart-line" class="chart-container"></div>
+                </div>
+                <div class="chart-card">
+                    <div class="card-header"><i class="fa fa-pie-chart" style="color:#3b82f6"></i> 热销品类占比</div>
+                    <div id="chart-pie" class="chart-container"></div>
+                </div>
+            </div>
+
+            <div class="bottom-grid">
+                <div class="panel">
+                    <div class="panel-stripe green"></div>
+                    <div class="card-header"><i class="fa fa-bolt" style="color:#16a34a"></i> 快速补货通道</div>
+                    <form id="upload-form">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>商品名称</label>
+                                <input type="text" id="fruit-name" class="form-input" placeholder="如: 进口车厘子" required>
+                            </div>
+                            <div class="form-group">
+                                <label>补充库存</label>
+                                <input type="number" id="fruit-stock" class="form-input" placeholder="0" required>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-bottom:20px;">
+                            <label>设定售价 (¥/kg)</label>
+                            <input type="number" step="0.01" id="fruit-selling-price" class="form-input" placeholder="0.00" required>
+                        </div>
+                        <button type="submit" class="submit-btn">
+                            <i class="fa fa-check-circle"></i> 确认提交更新
+                        </button>
+                    </form>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-stripe orange"></div>
+                    <div class="card-header" style="justify-content:space-between">
+                        <span><i class="fa fa-history" style="color:#f97316; margin-right:8px;"></i> 实时交易流水</span>
+                        <span style="background:#ffedd5; color:#ea580c; font-size:12px; padding:2px 8px; border-radius:10px;">LIVE</span>
+                    </div>
+                    <div id="sales-list" class="sales-list">
+                        <div style="text-align:center; color:#94a3b8; padding:30px;">正在加载数据...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            initCharts();
+            loadSalesData();
+            updateTime();
+        });
+
+        function updateTime() {
+            document.getElementById('current-time').innerText = new Date().toLocaleString('zh-CN', { hour12: false });
+            setTimeout(updateTime, 1000);
+        }
+
+        function initCharts() {
+            const lineChart = echarts.init(document.getElementById('chart-line'));
+            const pieChart = echarts.init(document.getElementById('chart-pie'));
+
+            fetch('/api/dashboard/data/').then(r=>r.json()).then(res=>{
+                if(res.success) {
+                    lineChart.setOption({
+                        tooltip: {trigger:'axis'},
+                        grid: {top:30, bottom:20, left:50, right:20, containLabel:true},
+                        xAxis: {type:'category', data:res.line_chart.dates, boundaryGap:false, axisLine:{show:false}, axisTick:{show:false}},
+                        yAxis: {type:'value', splitLine:{lineStyle:{type:'dashed', color:'#e2e8f0'}}},
+                        series: [{
+                            data: res.line_chart.values,
+                            type: 'line',
+                            smooth: true,
+                            symbol: 'none',
+                            lineStyle: {width:4, color:'#10b981'},
+                            areaStyle: {color: new echarts.graphic.LinearGradient(0,0,0,1, [{offset:0, color:'rgba(16,185,129,0.2)'}, {offset:1, color:'rgba(16,185,129,0)'}])}
+                        }]
+                    });
+
+                    pieChart.setOption({
+                        tooltip: {trigger:'item'},
+                        legend: {bottom:'0%', icon:'circle'},
+                        series: [{
+                            type: 'pie',
+                            radius: ['40%', '70%'],
+                            center: ['50%', '45%'],
+                            itemStyle: {borderRadius:5, borderColor:'#fff', borderWidth:2},
+                            data: res.pie_chart
+                        }]
+                    });
+
+                    const todayVal = res.line_chart.values[res.line_chart.values.length-1] || 0;
+                    document.getElementById('today-sales').innerText = '¥' + todayVal.toFixed(2);
+                    document.getElementById('today-orders').innerText = Math.floor(todayVal/15) + (todayVal > 0 ? 1 : 0);
+                }
+            });
+            window.onresize = () => { lineChart.resize(); pieChart.resize(); };
+        }
+
+        function loadSalesData() {
+            fetch('/api/sales/data/').then(r=>r.json()).then(res=>{
+                const list = document.getElementById('sales-list');
+                list.innerHTML = '';
+                if(res.data && res.data.length > 0) {
+                    res.data.slice(0, 10).forEach(item => {
+                        list.innerHTML += `
+                            <div class="sales-item">
+                                <div class="item-info">
+                                    <div class="item-icon">${item.product_name[0]}</div>
+                                    <div>
+                                        <div style="font-weight:bold; color:#334155">${item.product_name}</div>
+                                        <div style="font-size:12px; color:#94a3b8">数量: ${item.quantity_sold||1}</div>
+                                    </div>
+                                </div>
+                                <span class="money-text">+${(item.sellingPrice||0).toFixed(2)}</span>
+                            </div>`;
+                    });
+                } else {
+                    list.innerHTML = '<div style="text-align:center; color:#94a3b8; padding:30px;">暂无数据</div>';
+                }
+            });
+        }
+
+        document.getElementById('upload-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const btn = this.querySelector('button');
+            const oldTxt = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> 处理中...';
+
+            const data = {
+                name: document.getElementById('fruit-name').value,
+                stock: parseFloat(document.getElementById('fruit-stock').value),
+                price: parseFloat(document.getElementById('fruit-selling-price').value)
+            };
+
+            fetch('/api/upload/fruit/', {
+                method: 'POST',
+                headers: {'Content-Type':'application/json'},
+                body: JSON.stringify(data)
+            })
+            .then(r=>r.json())
+            .then(res=>{
+                if(res.success) {
+                    Swal.fire({icon:'success', title:'补货成功', timer:1500, showConfirmButton:false});
+                    document.getElementById('fruit-stock').value='';
+                    loadSalesData();
+                } else {
+                    Swal.fire('失败', res.error, 'error');
+                }
+            })
+            .finally(()=>{
+                btn.disabled = false;
+                btn.innerHTML = oldTxt;
+            });
+        });
+// admin.html 中替换原有的 generateAIReport 函数
+
+function generateAIReport() {
+    Swal.fire({
+        title: 'DeepSeek 正在思考...',
+        html: 'NPU 正在全速进行本地经营数据诊断<br>完全断网、数据不出本地！<br><br><div id="progress-text" style="color:#94a3b8;">准备中...</div>',
+        allowOutsideClick: false,
+        didOpen: () => { Swal.showLoading(); }
+    });
+
+    // 第一步：提交分析任务
+    fetch('/api/ai-analysis/request/', { method: 'POST' })
+        .then(res => res.json())
+        .then(data => {
+            if (!data.success) {
+                Swal.fire('提交失败', data.error, 'error');
+                return;
+            }
+            // 第二步：开始轮询
+            pollTaskStatus(data.task_id);
+        })
+        .catch(err => {
+            Swal.fire('网络错误', '请求失败，请检查后端服务', 'error');
+        });
+}
+
+function pollTaskStatus(taskId) {
+    let retries = 0;
+    const maxRetries = 60;   // 最多轮询 60 次（约 120 秒）
+    const interval = 2000;   // 每 2 秒轮询一次
+    const progressEl = document.getElementById('progress-text');
+
+    const timer = setInterval(() => {
+        fetch(`/api/ai-analysis/status/?task_id=${taskId}`)
+            .then(res => res.json())
+            .then(data => {
+                retries++;
+                if (progressEl) {
+                    progressEl.innerText = `已等待 ${(retries * 2)} 秒... (${data.status})`;
+                }
+
+                if (data.status === 'completed') {
+                    clearInterval(timer);
+                    displayAIReport(data);
+                } else if (data.status === 'failed') {
+                    clearInterval(timer);
+                    Swal.fire('分析失败', data.error || 'AI 引擎暂时不可用', 'error');
+                } else if (retries >= maxRetries) {
+                    clearInterval(timer);
+                    Swal.fire('超时', 'AI 推理时间过长，请稍后重试', 'warning');
+                }
+            })
+            .catch(err => {
+                clearInterval(timer);
+                Swal.fire('网络错误', '轮询中断，请刷新页面', 'error');
+            });
+    }, interval);
+}
+
+function displayAIReport(data) {
+    let recHtml = '';
+    if (data.recommendations && data.recommendations.length > 0) {
+        recHtml = data.recommendations.map(r => `
+            <li style="margin-bottom: 8px; border-bottom: 1px dashed #e2e8f0; padding-bottom: 8px;">
+                <b>${r.name}</b>: 
+                <span style="color:#eab308; font-weight:bold;">${r.action_type}</span> 
+                - <span style="color:#64748b;">${r.reason}</span>
+            </li>
+        `).join('');
+    }
+
+    Swal.fire({
+        title: 'DeepSeek 智能诊断报告',
+        html: `
+            <div style="text-align: left; font-size: 14px; line-height: 1.6;">
+                <div style="background: #f8fafc; padding: 12px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #8b5cf6;">
+                    <strong>📊 整体评价：</strong><br>
+                    <span style="color:#334155;">${data.overall_advice}</span>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <strong style="color: #ef4444;"><i class="fa fa-warning"></i> 紧急行动：</strong>
+                    <ul style="padding-left: 20px; color:#ef4444; margin-top:5px;">
+                        ${(data.urgent_actions || []).map(a => `<li>${a}</li>`).join('')}
+                    </ul>
+                </div>
+                <div>
+                    <strong style="color: #3b82f6;"><i class="fa fa-lightbulb-o"></i> 商品调优建议：</strong>
+                    <ul style="padding-left: 20px; margin-top:5px;">
+                        ${recHtml || '<li style="color:#10b981;">无异常，请继续保持！</li>'}
+                    </ul>
+                </div>
+            </div>
+        `,
+        width: '600px',
+        confirmButtonText: '收到，立即执行',
+        confirmButtonColor: '#8b5cf6'
+    });
+}
+    </script>
+</body>
+</html>

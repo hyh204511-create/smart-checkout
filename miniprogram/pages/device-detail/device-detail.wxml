@@ -1,0 +1,87 @@
+<!-- 设备详情页 -->
+<scroll-view scroll-y="true" class="page">
+    <!-- 设备基本信息 -->
+    <view class="card">
+        <view class="flex-between">
+            <text class="card-title">{{device.name || '加载中...'}}</text>
+            <view class="status-badge {{device.is_online ? 'badge-online' : 'badge-offline'}}">
+                {{device.is_online ? '● 在线' : '○ 离线'}}
+            </view>
+        </view>
+        <view class="info-grid">
+            <view class="info-item">
+                <text class="info-label">设备ID</text>
+                <text class="info-value">{{device.device_id}}</text>
+            </view>
+            <view class="info-item">
+                <text class="info-label">IP地址</text>
+                <text class="info-value">{{device.ip_address || '--'}}</text>
+            </view>
+            <view class="info-item">
+                <text class="info-label">软件版本</text>
+                <text class="info-value">{{device.agent_version}}</text>
+            </view>
+            <view class="info-item">
+                <text class="info-label">最后心跳</text>
+                <text class="info-value">{{util.timeAgo(device.last_heartbeat)}}</text>
+            </view>
+        </view>
+    </view>
+
+    <!-- 硬件状态 -->
+    <view class="card">
+        <view class="card-title">硬件状态</view>
+        <view class="status-grid">
+            <view class="status-item">
+                <text class="status-icon">🌡️</text>
+                <text class="status-text">CPU {{device.cpu_temp || '--'}}℃</text>
+            </view>
+            <view class="status-item">
+                <text class="status-icon">📷</text>
+                <text class="status-text {{device.camera_ok ? 'text-green' : 'text-red'}}">
+                    摄像头 {{device.camera_ok ? '正常' : '异常'}}
+                </text>
+            </view>
+            <view class="status-item">
+                <text class="status-icon">⚖️</text>
+                <text class="status-text {{device.scale_ok ? 'text-green' : 'text-red'}}">
+                    称重 {{device.scale_ok ? '正常' : '异常'}}
+                </text>
+            </view>
+            <view class="status-item">
+                <text class="status-icon">🧠</text>
+                <text class="status-text {{device.model_ok ? 'text-green' : 'text-red'}}">
+                    AI模型 {{device.model_ok ? '正常' : '异常'}}
+                </text>
+            </view>
+        </view>
+    </view>
+
+    <!-- 今日销售 -->
+    <view class="card">
+        <view class="card-title">今日销售概览</view>
+        <view class="flex-row" style="gap:32rpx">
+            <view class="flex-col" style="flex:1;align-items:center">
+                <text class="today-big">{{todaySales}}</text>
+                <text class="text-gray">销售额 (元)</text>
+            </view>
+            <view class="flex-col" style="flex:1;align-items:center">
+                <text class="today-big">{{todayOrders}}</text>
+                <text class="text-gray">订单数</text>
+            </view>
+        </view>
+    </view>
+
+    <!-- 最近订单 -->
+    <view class="card">
+        <view class="card-title">最近订单</view>
+        <view wx:if="{{recentOrders.length === 0}}" class="empty-tip">暂无订单</view>
+        <view wx:for="{{recentOrders}}" wx:key="order_id" class="order-item">
+            <view class="flex-between">
+                <text class="order-id">{{item.order_id}}</text>
+                <text class="text-bold">¥{{item.total_amount}}</text>
+            </view>
+            <text class="text-gray" style="font-size:22rpx">{{item.created_time}}</text>
+        </view>
+    </view>
+</scroll-view>

@@ -1,0 +1,57 @@
+<!-- 仪表板首页 -->
+<scroll-view scroll-y="true" class="page" refresher-enabled bindrefresherrefresh="onRefresh">
+    <!-- 顶部概览 -->
+    <view class="overview-cards flex-row">
+        <view class="stat-card">
+            <text class="stat-value">¥{{todaySales}}</text>
+            <text class="stat-label">今日销售额</text>
+        </view>
+        <view class="stat-card">
+            <text class="stat-value">{{todayOrders}}</text>
+            <text class="stat-label">今日订单数</text>
+        </view>
+        <view class="stat-card">
+            <text class="stat-value">{{onlineDevices}}/{{totalDevices}}</text>
+            <text class="stat-label">在线设备</text>
+        </view>
+    </view>
+
+    <!-- 设备列表 -->
+    <view class="card">
+        <view class="card-title">收银终端</view>
+        <view wx:if="{{devices.length === 0}}" class="empty-tip">暂无设备</view>
+        <view wx:for="{{devices}}" wx:key="device_id" class="device-item"
+              bindtap="goDetail" data-id="{{item.device_id}}">
+            <view class="flex-row">
+                <!-- 在线状态指示灯 -->
+                <view class="dot {{item.is_online ? 'dot-online' : 'dot-offline'}}"></view>
+                <view class="flex-col" style="flex:1">
+                    <text class="device-name">{{item.name}}</text>
+                    <text class="device-info text-gray">
+                        {{item.is_online ? '运行中' : '已离线'}}
+                        · {{item.last_heartbeat ? util.timeAgo(item.last_heartbeat) : '--'}}
+                    </text>
+                </view>
+                <view class="flex-col" style="align-items:flex-end">
+                    <text class="text-bold">¥{{item.today_sales}}</text>
+                    <text class="text-gray">今日</text>
+                </view>
+                <text class="arrow">›</text>
+            </view>
+            <!-- 异常提醒 -->
+            <view wx:if="{{!item.camera_ok || !item.scale_ok}}" class="device-warning">
+                <text wx:if="{{!item.camera_ok}}">⚠️ 摄像头异常 </text>
+                <text wx:if="{{!item.scale_ok}}">⚠️ 称重异常</text>
+            </view>
+        </view>
+    </view>
+
+    <!-- 热销商品 -->
+    <view class="card" wx:if="{{hotProducts.length > 0}}">
+        <view class="card-title">近7天热销商品</view>
+        <view wx:for="{{hotProducts}}" wx:key="name" class="hot-item flex-between" wx:if="{{index < 5}}">
+            <text>{{item.name}}</text>
+            <text class="text-green">¥{{item.amount.toFixed(0)}}</text>
+        </view>
+    </view>
+</scroll-view>

@@ -1,0 +1,47 @@
+<!-- 设置页 -->
+<scroll-view scroll-y="true" class="page">
+    <!-- 店主信息 -->
+    <view class="card">
+        <view class="card-title">店主信息</view>
+        <view class="flex-row">
+            <view class="avatar-text">👤</view>
+            <text>{{nickname || '店主'}}</text>
+        </view>
+    </view>
+
+    <!-- 连接状态 -->
+    <view class="card">
+        <view class="card-title">服务器连接</view>
+        <view class="info-row flex-between">
+            <text>云端地址</text>
+            <text class="text-gray">{{serverUrl}}</text>
+        </view>
+        <view class="info-row flex-between">
+            <text>在线设备</text>
+            <text class="text-green">{{onlineDevices}} / {{totalDevices}}</text>
+        </view>
+    </view>
+
+    <!-- 告警阈值 -->
+    <view class="card">
+        <view class="card-title">告警阈值设置</view>
+        <view class="info-row flex-between">
+            <text>设备离线告警</text>
+            <text class="text-gray">超过90秒无心跳</text>
+        </view>
+        <view class="info-row flex-between">
+            <text>库存不足告警</text>
+            <input class="threshold-input" type="digit" value="{{lowStockThreshold}}" bindinput="onThreshold" placeholder="5" />
+            <text class="text-gray">斤</text>
+        </view>
+    </view>
+
+    <!-- 操作 -->
+    <view class="card">
+        <button class="btn-logout" bindtap="logout">退出登录</button>
+    </view>
+
+    <view class="version text-gray" style="text-align:center;padding:40rpx">
+        智能生鲜收银管理 v1.0.0
+    </view>
+</scroll-view>

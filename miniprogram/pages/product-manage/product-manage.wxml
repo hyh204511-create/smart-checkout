@@ -1,0 +1,44 @@
+<!-- 商品管理页 -->
+<scroll-view scroll-y="true" class="page">
+    <!-- 搜索栏 -->
+    <view class="search-bar">
+        <input class="search-input" placeholder="搜索商品名称" bindinput="onSearch" value="{{keyword}}" />
+    </view>
+
+    <!-- 商品列表 -->
+    <view class="card">
+        <view class="flex-between" style="margin-bottom:16rpx">
+            <text class="card-title">商品列表 ({{products.length}})</text>
+            <button class="btn-add" bindtap="showAdd">+ 新增</button>
+        </view>
+        <view wx:if="{{products.length === 0}}" class="empty-tip">暂无商品</view>
+        <view wx:for="{{products}}" wx:key="id" class="product-item flex-between">
+            <view class="flex-col" style="flex:1">
+                <text class="product-name">{{item.name}}</text>
+                <text class="text-gray">
+                    售价 ¥{{item.price}} · 库存 {{item.stock}}斤 · 进货价 ¥{{item.cost_price}}
+                </text>
+            </view>
+            <view>
+                <button class="btn-edit" bindtap="showEdit" data-item="{{item}}" size="mini">编辑</button>
+                <button class="btn-del" bindtap="deleteProduct" data-id="{{item.id}}" size="mini">删除</button>
+            </view>
+        </view>
+    </view>
+
+    <!-- 新增/编辑弹窗 -->
+    <view class="modal" wx:if="{{showModal}}">
+        <view class="modal-content">
+            <text class="modal-title">{{editId ? '编辑商品' : '新增商品'}}</text>
+            <input class="modal-input" placeholder="商品名称" value="{{form.name}}" bindinput="onField" data-field="name" />
+            <input class="modal-input" placeholder="售价 (元/斤)" type="digit" value="{{form.price}}" bindinput="onField" data-field="price" />
+            <input class="modal-input" placeholder="进货价 (元/斤)" type="digit" value="{{form.cost_price}}" bindinput="onField" data-field="cost_price" />
+            <input class="modal-input" placeholder="库存 (斤)" type="digit" value="{{form.stock}}" bindinput="onField" data-field="stock" />
+            <view class="flex-row" style="gap:16rpx;margin-top:24rpx">
+                <button class="btn-cancel" bindtap="closeModal">取消</button>
+                <button class="btn-save" bindtap="saveProduct">保存</button>
+            </view>
+        </view>
+    </view>
+    <view class="modal-mask" wx:if="{{showModal}}" bindtap="closeModal"></view>
+</scroll-view>

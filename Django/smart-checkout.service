@@ -1,0 +1,19 @@
+[Unit]
+Description=Smart Checkout Django Server
+After=network.target network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=elf
+Group=elf
+WorkingDirectory=/home/elf/Django
+ExecStart=/usr/bin/python3 /home/elf/Django/manage.py runserver 0.0.0.0:8000
+Restart=always
+RestartSec=3
+StandardOutput=journal
+StandardError=journal
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target

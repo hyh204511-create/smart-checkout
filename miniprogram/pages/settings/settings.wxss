@@ -1,0 +1,6 @@
+.page { padding-bottom: 20rpx; }
+.avatar { width: 80rpx; height: 80rpx; border-radius: 50%; margin-right: 24rpx; }
+.avatar-text { font-size: 60rpx; margin-right: 24rpx; }
+.info-row { padding: 16rpx 0; border-bottom: 1rpx solid #f0f0f0; }
+.threshold-input { width: 100rpx; text-align: center; border: 1rpx solid #e0e0e0; border-radius: 8rpx; padding: 4rpx 8rpx; font-size: 28rpx; }
+.btn-logout { width: 100%; background: #FA5151; color: #fff; border: none; border-radius: 12rpx; padding: 20rpx 0; font-size: 32rpx; }

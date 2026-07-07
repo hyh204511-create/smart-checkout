@@ -1,0 +1,158 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>收银台支付</title>
+    {% load static %}
+
+<link href="{% static 'css/font-awesome.min.css' %}" rel="stylesheet">
+<script src="{% static 'js/jquery.min.js' %}"></script>
+<script src="{% static 'js/sweetalert2.all.min.js' %}"></script>
+    <style>
+        /* 原生 CSS，保持不变 */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f1f5f9; height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .pay-card { background: white; width: 100%; max-width: 450px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); overflow: hidden; margin: 20px; }
+        .header-bg { background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); padding: 30px; text-align: center; color: white; }
+        .icon-check { width: 60px; height: 60px; background: rgba(255,255,255,0.2); border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+        .order-title { font-size: 22px; font-weight: bold; margin-bottom: 5px; }
+        .order-id { font-family: monospace; opacity: 0.8; font-size: 14px; }
+
+        .details-box { padding: 25px; background: white; }
+        .section-title { font-size: 12px; font-weight: bold; color: #9ca3af; text-transform: uppercase; margin-bottom: 10px; }
+
+        .item-list { max-height: 150px; overflow-y: auto; margin-bottom: 15px; }
+        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dashed #e2e8f0; }
+        .item-row:last-child { border-bottom: none; }
+        .item-name { font-weight: 500; color: #1f2937; }
+        .item-sub { font-size: 12px; color: #9ca3af; }
+        .item-price { font-weight: bold; color: #4b5563; }
+
+        .total-row { display: flex; justify-content: space-between; align-items: center; padding-top: 15px; border-top: 2px solid #f1f5f9; margin-top: 5px; }
+        .total-label { font-weight: bold; color: #4b5563; }
+        .total-val { font-size: 28px; font-weight: 800; color: #dc2626; }
+
+        .qr-section { background: #f8fafc; padding: 20px; text-align: center; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; }
+        /* 关键修复：二维码容器 */
+        #qrcode-container { margin: 0 auto 15px; background: white; padding: 10px; border-radius: 8px; display: inline-block; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .payment-methods { display: flex; justify-content: center; gap: 20px; font-size: 13px; color: #64748b; }
+        .pay-icon { margin-right: 5px; }
+
+        .action-area { padding: 25px; }
+        .btn-pay { width: 100%; padding: 15px; background: linear-gradient(90deg, #22c55e, #16a34a); color: white; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(34,197,94,0.3); transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-pay:hover { transform: translateY(-1px); }
+        .btn-pay:active { transform: scale(0.98); }
+        .btn-pay:disabled { background: #cbd5e1; cursor: not-allowed; box-shadow: none; }
+        .cancel-link { display: block; text-align: center; margin-top: 15px; color: #9ca3af; font-size: 14px; text-decoration: none; }
+    </style>
+</head>
+<body>
+
+    <div class="pay-card">
+        <div class="header-bg">
+            <div class="icon-check"><i class="fa fa-check"></i></div>
+            <div class="order-title">订单提交成功</div>
+            <div class="order-id" id="order-id-display">OD-...</div>
+        </div>
+
+        <div class="details-box">
+            <div class="section-title">购物清单</div>
+            <div id="order-items" class="item-list"></div>
+            <div class="total-row">
+                <span class="total-label">待支付总额</span>
+                <span class="total-val" id="total-amount">¥0.00</span>
+            </div>
+
+        </div>
+
+        <div class="qr-section">
+            <div id="qrcode-container"></div>
+            <div class="payment-methods">
+                <span><i class="fa fa-wechat pay-icon" style="color:#22c55e"></i> 微信支付</span>
+                <span><i class="fa fa-credit-card pay-icon" style="color:#3b82f6"></i> 支付宝</span>
+            </div>
+        </div>
+
+        <div class="action-area">
+            <button id="pay-btn" class="btn-pay">
+                <i class="fa fa-paper-plane"></i> 模拟支付完成
+            </button>
+            <a href="/" class="cancel-link">取消订单并返回</a>
+        </div>
+    </div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const orderId = params.get('orderId') || '未知订单';
+        const amount = parseFloat(params.get('amount') || 0).toFixed(2);
+        let items = [];
+        try { items = JSON.parse(decodeURIComponent(params.get('items') || '[]')); } catch (e) { console.error(e); }
+
+        document.getElementById('order-id-display').innerText = '订单号: ' + orderId;
+        document.getElementById('total-amount').innerText = '¥' + amount;
+
+        const itemsDiv = document.getElementById('order-items');
+        if (items.length === 0) {
+            itemsDiv.innerHTML = '<div style="text-align:center;color:#ccc;padding:10px;">无商品信息</div>';
+        } else {
+            items.forEach(item => {
+                itemsDiv.innerHTML += `
+                    <div class="item-row">
+                        <div>
+                            <div class="item-name">${item.name}</div>
+                            <div class="item-sub">单价 ¥${item.price} x ${item.weight}kg</div>
+                        </div>
+                        <div class="item-price">¥${item.total}</div>
+                    </div>`;
+            });
+        }
+
+        // 关键修复：页面加载后本地生成二维码
+        $(document).ready(function() {
+            $('#qrcode-container').qrcode({
+                text: "PAY_" + orderId + "_" + amount,
+                width: 160,
+                height: 160
+            });
+        });
+
+        document.getElementById('pay-btn').addEventListener('click', async () => {
+            const btn = document.getElementById('pay-btn');
+            const originalContent = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> 确认中...';
+
+            try {
+                const res = await fetch('/api/pay-order/', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ order_id: orderId })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    if(data.voice_text) {
+                        fetch('/api/send-tts/', {
+                            method: 'POST', headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({ text: data.voice_text })
+                        });
+                    }
+                    btn.innerHTML = '<i class="fa fa-check"></i> 支付成功';
+                    btn.style.background = '#10b981';
+                    setTimeout(() => window.location.href = '/', 1000);
+                } else {
+                    alert('支付失败: ' + (data.error || '未知错误'));
+                    btn.disabled = false;
+                    btn.innerHTML = '重试支付';
+                }
+            } catch (e) {
+                alert('网络连接错误');
+                btn.disabled = false;
+                btn.innerHTML = originalContent;
+            }
+        });
+    </script>
+</body>
+</html>

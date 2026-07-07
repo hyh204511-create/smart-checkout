@@ -1,0 +1,6 @@
+.page { padding-bottom: 20rpx; }
+.filter-bar { padding: 20rpx; background: #fff; margin: 20rpx; border-radius: 16rpx; }
+.date-btn { color: #07C160; font-size: 28rpx; padding: 8rpx 16rpx; background: #e8f8ef; border-radius: 8rpx; }
+.btn-small { font-size: 24rpx; padding: 8rpx 20rpx; background: #07C160; color: #fff; border-radius: 8rpx; border: none; }
+.sum-big { font-size: 44rpx; font-weight: 700; color: #07C160; margin-bottom: 8rpx; }
+.device-sales-item { padding: 16rpx 0; border-bottom: 1rpx solid #f0f0f0; }

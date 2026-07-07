@@ -1,0 +1,102 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系统登录</title>
+    {% load static %}
+
+<link href="{% static 'css/font-awesome.min.css' %}" rel="stylesheet">
+<script src="{% static 'js/jquery.min.js' %}"></script>
+<script src="{% static 'js/sweetalert2.all.min.js' %}"></script>
+
+    <style>
+        /* 原生 CSS，保持不变 */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: linear-gradient(135deg, #0f172a 0%, #166534 100%); height: 100vh; display: flex; align-items: center; justify-content: center; }
+
+        .glass-card { background: rgba(255, 255, 255, 0.95); width: 100%; max-width: 420px; padding: 40px; border-radius: 24px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); border: 1px solid rgba(255,255,255,0.2); text-align: center; margin: 20px; }
+        .icon-circle { width: 80px; height: 80px; background: #dcfce7; color: #16a34a; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 36px; }
+        h2 { font-size: 28px; color: #1f2937; margin-bottom: 8px; font-weight: 800; }
+        .subtitle { color: #6b7280; font-size: 14px; margin-bottom: 30px; }
+        .form-group { margin-bottom: 20px; text-align: left; }
+        .form-label { display: block; color: #374151; font-weight: bold; font-size: 14px; margin-bottom: 8px; margin-left: 4px; }
+        .input-wrapper { position: relative; }
+        .input-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 18px; }
+        .form-input { width: 100%; padding: 14px 14px 14px 48px; border: 1px solid #e5e7eb; border-radius: 12px; background: #f9fafb; font-size: 16px; outline: none; transition: 0.3s; }
+        .form-input:focus { background: white; border-color: #22c55e; box-shadow: 0 0 0 4px rgba(34,197,94,0.1); }
+        .login-btn { width: 100%; padding: 14px; background: linear-gradient(90deg, #16a34a, #15803d); color: white; border: none; border-radius: 12px; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 6px rgba(22, 163, 74, 0.3); transition: 0.2s; margin-top: 10px; }
+        .login-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 10px rgba(22, 163, 74, 0.4); }
+        .back-link { display: inline-block; margin-top: 24px; color: #9ca3af; text-decoration: none; font-size: 14px; transition: 0.2s; }
+        .back-link:hover { color: #16a34a; }
+    </style>
+</head>
+<body>
+    <div class="glass-card">
+        <div class="icon-circle"><i class="fa fa-leaf"></i></div>
+        <h2>管理员登录</h2>
+        <p class="subtitle">智能零售收银系统后台</p>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label class="form-label">账号</label>
+                <div class="input-wrapper">
+                    <i class="fa fa-user input-icon"></i>
+                    <input type="text" id="username" class="form-input" placeholder="请输入管理员账号" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">密码</label>
+                <div class="input-wrapper">
+                    <i class="fa fa-lock input-icon"></i>
+                    <input type="password" id="password" class="form-input" placeholder="••••••••" required>
+                </div>
+            </div>
+
+            <button type="submit" class="login-btn">
+                <i class="fa fa-sign-in"></i> 立即登录
+            </button>
+        </form>
+
+        <a href="/" class="back-link">
+            <i class="fa fa-arrow-left"></i> 返回收银前台
+        </a>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const btn = this.querySelector('button');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> 验证中...';
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const res = await fetch('/api/user/login/', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({username, password})
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    window.location.href = "/dashboard/";
+                } else {
+                    alert('登录失败: ' + (data.error || '用户名或密码错误'));
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                }
+            } catch (err) {
+                alert('网络连接错误');
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        });
+    </script>
+</body>
+</html>

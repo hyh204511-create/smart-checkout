@@ -1,0 +1,19 @@
+[Unit]
+Description=Smart Checkout Device Agent - Cloud Sync
+After=network.target network-online.target smart-checkout.service
+Wants=network-online.target smart-checkout.service
+
+[Service]
+Type=simple
+User=elf
+Group=elf
+WorkingDirectory=/home/elf/Django
+ExecStart=/usr/bin/python3 /home/elf/Django/device_agent.py --device-name "RK3588-收银终端"
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target

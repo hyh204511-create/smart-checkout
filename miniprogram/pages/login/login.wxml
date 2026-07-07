@@ -1,0 +1,15 @@
+<!-- 登录页 -->
+<view class="login-container">
+    <view class="logo-area">
+        <view class="logo-text">🥬</view>
+        <text class="title">智能生鲜收银管理</text>
+        <text class="subtitle">多终端监控 · 一站式管理</text>
+    </view>
+    <view class="btn-area">
+        <button class="wx-login-btn" bindtap="handleLogin"
+                loading="{{loading}}" disabled="{{loading}}">
+            <text>微信一键登录</text>
+        </button>
+        <text class="hint">登录后可查看所有收银终端状态</text>
+    </view>
+</view>
